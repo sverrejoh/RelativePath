@@ -1,9 +1,21 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import {window, workspace, commands, Disposable,
-    ExtensionContext, StatusBarAlignment, StatusBarItem,
-    TextDocument, QuickPickItem, FileSystemWatcher, Uri,
-    TextEditorEdit, TextEditor, Position} from 'vscode';
+import {
+    window,
+    workspace,
+    commands,
+    Disposable,
+    ExtensionContext,
+    StatusBarAlignment,
+    StatusBarItem,
+    TextDocument,
+    QuickPickItem,
+    FileSystemWatcher,
+    Uri,
+    TextEditorEdit,
+    TextEditor,
+    Position
+} from "vscode";
 import * as path from "path";
 let Glob = require("glob");
 
@@ -26,7 +38,6 @@ export function activate(context: ExtensionContext) {
 }
 
 class RelativePath {
-
     private _items: string[];
     private _watcher: FileSystemWatcher;
     private _workspacePath: string;
@@ -75,18 +86,16 @@ class RelativePath {
                 this._myGlob.resume();
             }
         } else {
-            this._myGlob = new Glob(this._workspacePath + "/**/*.*",
-                { ignore: this._configuration.get("ignore") },
-                (err, files) => {
-                    if (err) {
-                        return;
-                    }
+            this._myGlob = new Glob(this._workspacePath + "/**/*.*", { ignore: this._configuration.get("ignore") }, (err, files) => {
+                if (err) {
+                    return;
+                }
 
-                    this._items = files;
-                    if (!skipOpen) {
-                        this.findRelativePath();
-                    }
-                });
+                this._items = files;
+                if (!skipOpen) {
+                    this.findRelativePath();
+                }
+            });
             this._myGlob.on("end", () => {
                 this._pausedSearch = false;
             });
@@ -98,7 +107,10 @@ class RelativePath {
         let emptyItem: QuickPickItem = { label: "", description: "No files found" };
 
         // Show loading info box
-        let info = window.showQuickPick([emptyItem], { matchOnDescription: false, placeHolder: "Finding files... Please wait. (Press escape to cancel)" });
+        let info = window.showQuickPick([emptyItem], {
+            matchOnDescription: false,
+            placeHolder: "Finding files... Please wait. (Press escape to cancel)"
+        });
         info.then(
             (value?: any) => {
                 if (this._myGlob) {
@@ -134,7 +146,7 @@ class RelativePath {
 
     // Listen for changes in the config files and update the config object
     private initializeConfigWatcher(): void {
-        workspace.onDidChangeConfiguration((e) => {
+        workspace.onDidChangeConfiguration(e => {
             const lastConfig = this._configuration;
             this._configuration = workspace.getConfiguration("relativePath");
 
@@ -163,14 +175,14 @@ class RelativePath {
 
     // Check if the current extension should be excluded
     private excludeExtensionsFor(relativeUrl: string) {
-        const currentExtension = path.extname(relativeUrl)
-        if (currentExtension === '') {
+        const currentExtension = path.extname(relativeUrl);
+        if (currentExtension === "") {
             return false;
         }
 
         return this._configuration.excludedExtensions.some((ext: string) => {
-            return (ext.startsWith('.') ? ext : `.${ext}`).toLowerCase() === currentExtension.toLowerCase();
-        })
+            return (ext.startsWith(".") ? ext : `.${ext}`).toLowerCase() === currentExtension.toLowerCase();
+        });
     }
 
     // Get the picked item
@@ -185,16 +197,14 @@ class RelativePath {
             } else if (this.excludeExtensionsFor(relativeUrl)) {
                 relativeUrl = relativeUrl.substring(0, relativeUrl.lastIndexOf("."));
             }
-            if (this._configuration.removeLeadingDot && relativeUrl.startsWith("./../")) {
+            if (relativeUrl.startsWith("./../")) {
                 relativeUrl = relativeUrl.substring(2, relativeUrl.length);
             }
 
-            window.activeTextEditor.edit(
-                (editBuilder: TextEditorEdit) => {
-                    let position: Position = window.activeTextEditor.selection.end;
-                    editBuilder.insert(position, relativeUrl);
-                }
-            );
+            window.activeTextEditor.edit((editBuilder: TextEditorEdit) => {
+                let position: Position = window.activeTextEditor.selection.end;
+                editBuilder.insert(position, relativeUrl);
+            });
         }
     }
 
